@@ -106,8 +106,8 @@ export default function TTSInterface() {
         {/* Text Input */}
         <div className="space-y-4">
           <div className="text-center mb-6">
-            <h1 className="text-3xl font-bold text-gray-800 mb-2">Romanian Text-to-Speech</h1>
-            <p className="text-gray-600">Enter Romanian text (maximum 35 words)</p>
+            <h1 className="text-3xl font-bold text-gray-800 mb-2">Conversia Text-Vorbire Utilizand Retele Neuronale</h1>
+            <p className="text-gray-600">Introduceti text in Limba Romana(maxim 35 de cuvinte)</p>
           </div>
 
           <Card className="p-6 shadow-lg border-0 bg-white/80 backdrop-blur-sm max-w-2xl mx-auto">
