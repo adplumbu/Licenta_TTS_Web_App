@@ -14,33 +14,55 @@ export default function TTSInterface() {
   const [duration, setDuration] = useState(0)
   const [currentTime, setCurrentTime] = useState(0)
   const audioRef = useRef<HTMLAudioElement>(null)
+  const [selectedSpeaker, setSelectedSpeaker] = useState("VCTK_SPK01_male_cv_ro")
 
   const wordCount = text
     .trim()
     .split(/\s+/)
     .filter((word) => word.length > 0).length
 
+  const speakerOptions = [
+    { id: "VCTK_SPK01_male_cv_ro", label: "VCTK SPK01 (Male - CV)" },
+    { id: "VCTK_SPK02_male_cv_ro", label: "VCTK SPK02 (Male - CV)" },
+    { id: "VCTK_SPK03_male_cv_ro", label: "VCTK SPK03 (Male - CV)" },
+    { id: "VCTK_SPK04_male_cv_ro", label: "VCTK SPK04 (Male - CV)" },
+    { id: "VCTK_SPK05_male_cv_ro", label: "VCTK SPK05 (Male - CV)" },
+    { id: "VCTK_SPK06_male_cv_ro", label: "VCTK SPK06 (Male - CV)" },
+    { id: "VCTK_SPK07_male_cv_ro", label: "VCTK SPK07 (Male - CV)" },
+    { id: "VCTK_SPK08_female_cv_ro", label: "VCTK SPK08 (Female - CV)" },
+    { id: "VCTK_SPK09_male_cv_ro", label: "VCTK SPK09 (Male - CV)" },
+    { id: "VCTK_SPK10_male_cv_ro", label: "VCTK SPK10 (Male - CV)" },
+    { id: "VCTK_SPK11_male_cv_ro", label: "VCTK SPK11 (Male - CV)" },
+    { id: "VCTK_SPK12_male_cv_ro", label: "VCTK SPK12 (Male - CV)" },
+    { id: "VCTK_SPK13_male_cv_ro", label: "VCTK SPK13 (Male - CV)" },
+    { id: "VCTK_SPK14_male_cv_ro", label: "VCTK SPK14 (Male - CV)" },
+    { id: "VCTK_SPK15_female_cv_ro", label: "VCTK SPK15 (Female - CV)" },
+    { id: "VCTK_SPK16_female_cv_ro", label: "VCTK SPK16 (Female - CV)" },
+    { id: "VCTK_SPK17_male_cv_ro", label: "VCTK SPK17 (Male - CV)" },
+    { id: "VCTK_SPK18_female_rss_ro", label: "VCTK SPK18 (Female - RSS)" },
+  ]
+
   const handleConvert = async () => {
-    if (!text.trim() || wordCount > 35) return
+    if (!text.trim() || wordCount > 150) return
 
     setIsLoading(true)
+    setAudioUrl(null) // Clear previous audio
 
-    // Simulate API call to your backend
     try {
-      // Replace this with your actual API endpoint
-      // const response = await fetch('/api/tts', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify({ text })
-      // })
-      // const audioBlob = await response.blob()
-      // const url = URL.createObjectURL(audioBlob)
+      const response = await fetch(
+        `http://127.0.0.1:8000/synthesize?text=${encodeURIComponent(text)}&speaker_name=${selectedSpeaker}`,
+      )
 
-      // For demo purposes, using a placeholder
-      await new Promise((resolve) => setTimeout(resolve, 3000))
-      setAudioUrl("/placeholder-audio.wav") // Replace with actual audio URL
+      if (!response.ok) {
+        throw new Error("Failed to synthesize audio")
+      }
+
+      const audioBlob = await response.blob()
+      const url = URL.createObjectURL(audioBlob)
+      setAudioUrl(url)
     } catch (error) {
       console.error("Error converting text to speech:", error)
+      // You might want to show an error message to the user here
     } finally {
       setIsLoading(false)
     }
@@ -107,8 +129,29 @@ export default function TTSInterface() {
         <div className="space-y-4">
           <div className="text-center mb-6">
             <h1 className="text-3xl font-bold text-gray-800 mb-2">Conversia Text-Vorbire Utilizand Retele Neuronale</h1>
-            <p className="text-gray-600">Introduceti text in Limba Romana(maxim 35 de cuvinte)</p>
+            <p className="text-gray-600">Introduceti text in Limba Romana(maxim 150 de cuvinte)</p>
           </div>
+
+          {/* Speaker Selection Dropdown */}
+          <Card className="p-4 shadow-lg border-0 bg-white/80 backdrop-blur-sm max-w-2xl mx-auto">
+            <div className="space-y-2">
+              <label htmlFor="speaker-select" className="text-sm font-medium text-gray-700">
+                Selectați vocea:
+              </label>
+              <select
+                id="speaker-select"
+                value={selectedSpeaker}
+                onChange={(e) => setSelectedSpeaker(e.target.value)}
+                className="w-full p-3 border-2 border-gray-200 rounded-md focus:border-blue-400 transition-colors bg-white"
+              >
+                {speakerOptions.map((speaker) => (
+                  <option key={speaker.id} value={speaker.id}>
+                    {speaker.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </Card>
 
           <Card className="p-6 shadow-lg border-0 bg-white/80 backdrop-blur-sm max-w-2xl mx-auto">
             <Textarea
@@ -119,10 +162,10 @@ export default function TTSInterface() {
               maxLength={200}
             />
             <div className="flex justify-between items-center mt-3">
-              <span className={`text-sm ${wordCount > 35 ? "text-red-500" : "text-gray-500"}`}>
-                {wordCount}/35 words
+              <span className={`text-sm ${wordCount > 150 ? "text-red-500" : "text-gray-500"}`}>
+                {wordCount}/150 words
               </span>
-              {wordCount > 35 && <span className="text-red-500 text-sm">Text exceeds 35 words limit</span>}
+              {wordCount > 150 && <span className="text-red-500 text-sm">Text exceeds 150 words limit</span>}
             </div>
           </Card>
         </div>
@@ -131,7 +174,7 @@ export default function TTSInterface() {
         <div className="flex justify-center">
           <Button
             onClick={handleConvert}
-            disabled={!text.trim() || wordCount > 35 || isLoading}
+            disabled={!text.trim() || wordCount > 150 || isLoading}
             className="px-8 py-4 text-lg font-semibold bg-blue-600 hover:bg-blue-700 disabled:opacity-50 shadow-lg transition-all duration-200 hover:shadow-xl"
           >
             Convert to Audio
